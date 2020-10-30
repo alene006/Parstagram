@@ -19,6 +19,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     let myRefreshControl = UIRefreshControl()
     
     var posts = [PFObject]()
+    var selectedPost: PFObject!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,13 +57,14 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBAction func logout(_ sender: Any) {
         PFUser.logOut()
-        self.dismiss(animated: true, completion: nil)
+//        self.dismiss(animated: true, completion: nil)
         
-//        let main = UIStoryboard(name: "Main", bundle: nil)
-//        let loginViewController = main.instantiateViewController(withIdentifier: "LoginViewController")
+        let main = UIStoryboard(name: "Main", bundle: nil)
+        let loginViewController = main.instantiateViewController(withIdentifier: "LoginViewController")
 
-//        let delegate = UIApplication.shared.delegate as! AppDelegate
-//        delegate.window?.rootViewController = loginViewController
+        let delegate = self.view.window?.windowScene?.delegate as! SceneDelegate
+        delegate.window?.rootViewController = loginViewController
+        print("User Logged Out!")
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -86,6 +88,22 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     func messageInputBar(_ inputBar: MessageInputBar, didPressSendButtonWith text: String) {
         // Create the comment
+        let comment = PFObject(className: "Comments")
+        comment["text"] = text
+        comment["post"] = selectedPost
+        comment["author"] = PFUser.current()!
+
+        selectedPost.add(comment, forKey: "comments")
+
+        selectedPost.saveInBackground { (success, error) in
+            if success {
+                print("Comment saved successfully!")
+            } else {
+                print("Error saving comment")
+            }
+        }
+        
+        tableView.reloadData()
         
         // Clear and dismiss the input bar
         commentBar.inputTextView.text = nil
@@ -141,7 +159,7 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let post = posts[indexPath.row]
+        let post = posts[indexPath.section]
         
         let comments = (post["comments"] as? [PFObject]) ?? []
         
@@ -149,21 +167,10 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
             showsCommentBar = true
             becomeFirstResponder()
             commentBar.inputTextView.becomeFirstResponder()
+            
+            selectedPost = post
         }
-        
-//        comment["text"] = "This is a random comment"
-//        comment["post"] = post
-//        comment["author"] = PFUser.current()!
-//
-//        post.add(comment, forKey: "comments")
-//
-//        post.saveInBackground { (success, error) in
-//            if success {
-//                print("Comment saved successfully!")
-//            } else {
-//                print("Error saving comment")
-//            }
-//        }
+
     }
     /*
     // MARK: - Navigation
