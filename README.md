@@ -23,4 +23,4 @@ The following **bonus** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://g.recordit.co/R8yyo93OK7.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='./parstagram.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
